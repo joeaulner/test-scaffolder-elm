@@ -1,0 +1,16 @@
+{
+  "name": "test-scaffolder-elm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "Joseph Aulner",
+  "license": "ISC",
+  "devDependencies": {
+    "elm-webpack-loader": "^2.0.1",
+    "webpack": "^1.12.14"
+  }
+}
