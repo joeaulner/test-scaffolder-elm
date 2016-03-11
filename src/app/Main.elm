@@ -6,6 +6,17 @@ import Html.Attributes as Attr
 
 main : Html
 main =
-    Html.div
-        [ Attr.class "card-panel teal lighten-2" ]
-        [ Html.h2 [] [ Html.text "Hello World!" ] ]
+    Html.div []
+        [ Html.nav
+            [ Attr.class "light-green darken-1" ]
+            [ Html.div
+                [ Attr.class "nav-wrapper container" ]
+                [ Html.span
+                    [ Attr.class "brand-logo" ]
+                    [ Html.text "Test Scaffolder" ]
+                ]
+            ]
+        , Html.div
+            [ Attr.class "container" ]
+            [ Html.div [] [ Html.text "<content here>" ] ]
+        ]
