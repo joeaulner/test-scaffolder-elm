@@ -19,10 +19,16 @@ module.exports = {
     ],
     module: {
         noParse: [/\.elm$/],
-        loaders: [{
-            test: /\.elm$/,
-            exclude: [/elm-stuff/, /node_modules/],
-            loader: 'elm-webpack'
-        }]
+        loaders: [
+            {
+                test: /\.elm$/,
+                exclude: [/elm-stuff/, /node_modules/],
+                loader: 'elm-webpack'
+            },
+            {
+                test: /\.css$/,
+                loader: 'style!css'
+            }
+        ]
     }
 };
