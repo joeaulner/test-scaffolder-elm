@@ -7,5 +7,5 @@ import Html.Attributes as Attr
 main : Html
 main =
     Html.div
-        [ Attr.class "mui-appbar" ]
-        [ Html.h2 [ Attr.style [ ("padding", "8px") ] ] [ Html.text "Hello World!" ] ]
+        [ Attr.class "card-panel teal lighten-2" ]
+        [ Html.h2 [] [ Html.text "Hello World!" ] ]
