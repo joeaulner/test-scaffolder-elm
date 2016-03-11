@@ -11,6 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "elm-webpack-loader": "^2.0.1",
+    "html-webpack-plugin": "^2.10.0",
     "webpack": "^1.12.14"
-  }
+  },
+  "dependencies": {}
 }
