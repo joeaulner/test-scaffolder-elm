@@ -1,9 +1,15 @@
 module Main where
 
 import Html exposing (Html)
-import TestScaffolder
+import Signal exposing (Signal)
+import Scaffolder
 
 
-main : Html
+main : Signal Html
 main =
-    TestScaffolder.view
+    let
+        actions = Scaffolder.actions
+    in
+        Signal.map
+            (Scaffolder.view actions.address)
+            Scaffolder.model
