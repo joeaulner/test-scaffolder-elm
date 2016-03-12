@@ -1,8 +1,8 @@
 module Scaffolder (model, view, actions) where
 
-import Html exposing (Html)
+import Html exposing (Html, div, nav, span, text, textarea, label, form)
+import Html.Attributes exposing (class, id, for)
 import Signal exposing (Signal, Mailbox, Address)
-import Html.Attributes as Attr
 
 
 type Action =
@@ -36,17 +36,35 @@ update action model =
 
 view : Address Action -> Model -> Html
 view address model =
-    Html.div []
-        [ Html.nav
-            [ Attr.class "light-green darken-1" ]
-            [ Html.div
-                [ Attr.class "nav-wrapper container" ]
-                [ Html.span
-                    [ Attr.class "brand-logo" ]
-                    [ Html.text "Test Scaffolder" ]
+    div []
+        [ nav [ class "light-green darken-1" ]
+            [ div [ class "nav-wrapper container" ]
+                [ span [ class "brand-logo" ]
+                    [ text "Test Scaffolder" ]
                 ]
             ]
-        , Html.div
-            [ Attr.class "container" ]
-            [ Html.div [] [ Html.text "<content here>" ] ]
+        , div [ class "container" ]
+            [ div [ class "section row" ]
+                [ form [ class "col s12" ]
+                    [ div [ class "row" ]
+                        [ div [ class "input-field col s6" ]
+                            [ textarea
+                                [ id "textarea1"
+                                , class "materialize-textarea"
+                                ] []
+                            , label [ for "textarea1" ]
+                                [ text "Test cases" ]
+                            ]
+                        , div [ class "input-field col s6" ]
+                            [ textarea
+                                [ id "textarea2"
+                                , class "materialize-textarea"
+                                ] []
+                            , label [ for "textarea2" ]
+                                [ text "Output" ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
         ]
