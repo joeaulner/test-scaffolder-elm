@@ -5,17 +5,13 @@ import Html.Attributes exposing (class, id, for)
 import Signal exposing (Signal, Mailbox, Address)
 
 
-type Action =
-    NoOp
+-- MODEL
 
 
 type alias Model =
-    { nothing : String }
-
-
-actions : Mailbox Action
-actions =
-    Signal.mailbox NoOp
+    { testCases : String
+    , testSource : String
+    }
 
 
 model : Signal Model
@@ -25,13 +21,30 @@ model =
 
 initModel : Model
 initModel =
-    { nothing = "" }
+    { testCases = ""
+    , testSource = ""
+    }
+
+
+-- UDPATE
+
+
+type Action =
+    NoOp
+
+
+actions : Mailbox Action
+actions =
+    Signal.mailbox NoOp
 
 
 update : Action -> Model -> Model
 update action model =
     case action of
         NoOp -> model
+
+
+-- VIEW
 
 
 view : Address Action -> Model -> Html
