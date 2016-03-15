@@ -3,6 +3,7 @@ module Formatter where
 import Html exposing (Html, div, textarea, label, text)
 import Html.Attributes exposing (class, id, for, readonly)
 import Signal exposing (Signal, Address)
+import String
 
 
 -- MODEL
@@ -38,7 +39,7 @@ update action formatter =
 view : Address Action -> Formatter -> Html
 view address formatter =
     let
-        statusClass = if formatter.output == "" then "" else " active"
+        statusClass = if String.isEmpty formatter.output then "" else " active"
     in
         div [ class "input-field col s6" ]
             [ textarea
