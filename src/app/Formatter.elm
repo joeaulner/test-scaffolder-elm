@@ -1,7 +1,7 @@
 module Formatter where
 
 import Html exposing (Html, div, textarea, label, text)
-import Html.Attributes exposing (class, id, for)
+import Html.Attributes exposing (class, id, for, readonly)
 import Signal exposing (Signal, Address)
 
 
@@ -37,9 +37,16 @@ update action formatter =
 
 view : Address Action -> Formatter -> Html
 view address formatter =
-    div [ class "input-field col s6" ]
-        [ textarea [ id "formatter", class "materialize-textarea" ]
-            [ text formatter.output ]
-        , label [ for "formatter" ]
-            [ text "Code Scaffold" ]
-        ]
+    let
+        statusClass = if formatter.output == "" then "" else " active"
+    in
+        div [ class "input-field col s6" ]
+            [ textarea
+                [ id "formatter"
+                , class "materialize-textarea"
+                , readonly True
+                ]
+                [ text formatter.output ]
+            , label [ for "formatter", class statusClass ]
+                [ text "Code Scaffold" ]
+            ]
