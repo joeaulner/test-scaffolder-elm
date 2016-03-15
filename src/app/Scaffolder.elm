@@ -4,13 +4,16 @@ import Html exposing (Html, div, nav, span, text, textarea, label, form)
 import Html.Attributes exposing (class, id, for)
 import Signal exposing (Signal, Mailbox, Address)
 
+import Parser exposing (Parser)
+import Formatter exposing (Formatter)
+
 
 -- MODEL
 
 
 type alias Model =
-    { testCases : String
-    , testSource : String
+    { parser : Parser
+    , formatter : Formatter
     }
 
 
@@ -21,16 +24,17 @@ model =
 
 initModel : Model
 initModel =
-    { testCases = ""
-    , testSource = ""
+    { parser = Parser.init
+    , formatter = Formatter.init
     }
 
 
 -- UDPATE
 
 
-type Action =
-    NoOp
+type Action
+    = NoOp
+    | ParserInput Parser.Action
 
 
 actions : Mailbox Action
@@ -42,6 +46,13 @@ update : Action -> Model -> Model
 update action model =
     case action of
         NoOp -> model
+        ParserInput act ->
+            let
+                parser' = Parser.update act model.parser
+                formatter' = Formatter.update
+                    (Formatter.SetOutput parser'.output) model.formatter
+            in
+                { model | parser = parser', formatter = formatter' }
 
 
 -- VIEW
@@ -60,22 +71,8 @@ view address model =
             [ div [ class "section row" ]
                 [ form [ class "col s12" ]
                     [ div [ class "row" ]
-                        [ div [ class "input-field col s6" ]
-                            [ textarea
-                                [ id "textarea1"
-                                , class "materialize-textarea"
-                                ] []
-                            , label [ for "textarea1" ]
-                                [ text "Test cases" ]
-                            ]
-                        , div [ class "input-field col s6" ]
-                            [ textarea
-                                [ id "textarea2"
-                                , class "materialize-textarea"
-                                ] []
-                            , label [ for "textarea2" ]
-                                [ text "Output" ]
-                            ]
+                        [ Parser.view (Signal.forwardTo address ParserInput) model.parser
+                        , Formatter.view (Signal.forwardTo address (\x -> NoOp)) model.formatter
                         ]
                     ]
                 ]
