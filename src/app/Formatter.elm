@@ -22,15 +22,15 @@ init =
 
 type Action
     = NoOp
-    | SetOutput String
+    | SetParsed String
 
 
 update : Action -> Formatter -> Formatter
 update action formatter =
     case action of
         NoOp -> formatter
-        SetOutput output' ->
-            { formatter | output = output' }
+        SetParsed parsed ->
+            { formatter | output = parsed }
 
 
 -- VIEW
