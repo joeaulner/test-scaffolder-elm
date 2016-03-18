@@ -1,5 +1,6 @@
 var path = require('path'),
-    HtmlWebpackPlugin = require('html-webpack-plugin');
+    HtmlWebpackPlugin = require('html-webpack-plugin'),
+    CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
     entry: [
@@ -15,6 +16,11 @@ module.exports = {
         new HtmlWebpackPlugin({
             title: 'Test Scaffolder',
             filename: 'index.html'
+        }),
+        new CleanWebpackPlugin(['build'], {
+            root: __dirname,
+            verbose: true,
+            dry: false
         })
     ],
     module: {

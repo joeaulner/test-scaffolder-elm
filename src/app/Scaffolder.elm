@@ -6,9 +6,6 @@ import Html.Events exposing (on, targetValue)
 import Signal exposing (Signal, Mailbox, Address)
 import String
 
-import Parser exposing (Parser)
-import Formatter exposing (Formatter)
-
 
 -- MODEL
 
