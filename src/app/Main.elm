@@ -15,6 +15,6 @@ main =
             Scaffolder.model
 
 
-port triggerResize : Signal (String, Scaffolder.Model)
+port triggerResize : Signal Scaffolder.Model
 port triggerResize =
-    Signal.map ((,) <| "formatter") Scaffolder.model
+    Scaffolder.model

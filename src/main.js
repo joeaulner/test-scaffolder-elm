@@ -10,8 +10,8 @@ an eye on this issue: https://github.com/rtfeldman/elm-webpack-loader/issues/35
 var Elm = require('./app/Main.elm'),
     app = Elm.fullscreen(Elm.Main);
 
-app.ports.triggerResize.subscribe(function(tuple) {
-    var selector = '#' + tuple[0];
+app.ports.triggerResize.subscribe(function(model) {
+    var selector = 'textarea';
     $(selector).trigger('autoresize');
 });
 

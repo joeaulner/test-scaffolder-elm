@@ -1,8 +1,10 @@
 module Scaffolder (Model, model, view, actions) where
 
 import Html exposing (Html, div, nav, span, text, textarea, label, form)
-import Html.Attributes exposing (class, id, for)
+import Html.Attributes exposing (class, id, for, readonly)
+import Html.Events exposing (on, targetValue)
 import Signal exposing (Signal, Mailbox, Address)
+import String
 
 import Parser exposing (Parser)
 import Formatter exposing (Formatter)
@@ -12,8 +14,8 @@ import Formatter exposing (Formatter)
 
 
 type alias Model =
-    { parser : Parser
-    , formatter : Formatter
+    { testCases : String
+    , codeScaffold : String
     }
 
 
@@ -24,8 +26,8 @@ model =
 
 initModel : Model
 initModel =
-    { parser = Parser.init
-    , formatter = Formatter.init
+    { testCases = ""
+    , codeScaffold = ""
     }
 
 
@@ -34,7 +36,7 @@ initModel =
 
 type Action
     = NoOp
-    | ParserInput Parser.Action
+    | SetInput String
 
 
 actions : Mailbox Action
@@ -46,13 +48,8 @@ update : Action -> Model -> Model
 update action model =
     case action of
         NoOp -> model
-        ParserInput act ->
-            let
-                parser' = Parser.update act model.parser
-                formatter' = Formatter.update
-                    (Formatter.SetParsed parser'.output) model.formatter
-            in
-                { model | parser = parser', formatter = formatter' }
+        SetInput testCases' ->
+            { model | testCases = testCases', codeScaffold = testCases' }
 
 
 -- VIEW
@@ -60,27 +57,54 @@ update action model =
 
 view : Address Action -> Model -> Html
 view address model =
-    let
-        parser = Parser.view
-            (Signal.forwardTo address ParserInput) model.parser
-        formatter = Formatter.view
-            (Signal.forwardTo address (\x -> NoOp)) model.formatter
-    in
-        div []
-            [ nav [ class "light-green darken-1" ]
-                [ div [ class "nav-wrapper container" ]
-                    [ span [ class "brand-logo" ]
-                        [ text "Test Scaffolder" ]
-                    ]
+    div []
+        [ nav [ class "light-green darken-1" ]
+            [ div [ class "nav-wrapper container" ]
+                [ span [ class "brand-logo" ]
+                    [ text "Test Scaffolder" ]
                 ]
-            , div [ class "container" ]
-                [ div [ class "section row" ]
-                    [ form [ class "col s12" ]
-                        [ div [ class "row" ]
-                            [ parser
-                            , formatter
-                            ]
+            ]
+        , div [ class "container" ]
+            [ div [ class "section row" ]
+                [ form [ class "col s12" ]
+                    [ div [ class "row" ]
+                        [ viewTestCases address
+                        , viewCodeScaffold address model
                         ]
                     ]
                 ]
+            ]
+        ]
+
+
+viewTestCases : Address Action -> Html
+viewTestCases address =
+    div [ class "input-field col s6" ]
+        [ textarea
+            [ id "test-cases"
+            , class "materialize-textarea"
+            , on "input" targetValue (Signal.message address << SetInput)
+            ] []
+        , label [ for "test-cases" ]
+            [ text "Test Cases" ]
+        ]    
+
+
+viewCodeScaffold : Address Action -> Model -> Html
+viewCodeScaffold address model =
+    let
+        statusClass =
+            if String.isEmpty model.codeScaffold
+                then ""
+                else "active"
+    in
+        div [ class "input-field col s6" ]
+            [ textarea
+                [ id "code-scaffold"
+                , class "materialize-textarea"
+                , readonly True
+                ]
+                [ text model.codeScaffold ]
+            , label [ for "code-scaffold", class statusClass ]
+                [ text "Code Scaffold" ]
             ]
