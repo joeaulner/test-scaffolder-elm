@@ -1,7 +1,6 @@
 require('../node_modules/materialize-css/dist/css/materialize.min.css');
 require('../node_modules/materialize-css/dist/js/materialize.min.js');
 
-
 /*
 currently forced to keep elm modules in one directory due to an issue
 with webpack not watching files contained in subdirectories, should keep
@@ -11,8 +10,7 @@ var Elm = require('./app/Main.elm'),
     app = Elm.fullscreen(Elm.Main);
 
 app.ports.triggerResize.subscribe(function(_) {
-    var selector = 'textarea';
-    $(selector).trigger('autoresize');
+    $('textarea').trigger('autoresize');
 });
 
 $('textarea').keydown(function(e) {

@@ -6,6 +6,8 @@ import Html.Events exposing (on, targetValue)
 import Signal exposing (Signal, Mailbox, Address)
 import String
 
+import Lexer
+
 
 -- MODEL
 
@@ -46,7 +48,10 @@ update action model =
     case action of
         NoOp -> model
         SetInput testCases' ->
-            { model | testCases = testCases', codeScaffold = testCases' }
+            let
+                tokenized = Lexer.toTokens testCases'
+            in
+                { model | testCases = testCases', codeScaffold = testCases' }
 
 
 -- VIEW
