@@ -2,6 +2,7 @@ module Lexer (Token, toTokens) where
 
 import String
 import Maybe
+import Regex
 
 -- REMOVE
 import Debug
@@ -39,8 +40,8 @@ lexLines indentStack lines =
 lexLine : List Int -> String -> (List Int, List Token)
 lexLine indentStack str =
     let
-        lastIndent = Maybe.withDefault 0 (List.head indentStack)
-        (indentCt, indentTk) = lexIndent lastIndent str
+        matchedStr = Debug.log "test regex" (match str)
+        (indentCt, indentTk) = lexIndent indentStack str
         indentStack' =
             case indentTk of
                 Indent -> indentCt :: indentStack
@@ -50,9 +51,22 @@ lexLine indentStack str =
         (indentStack', [ indentTk ])
 
 
-lexIndent : Int -> String -> (Int, Token)
-lexIndent prevIndentCt str =
+match : String -> List (Maybe String)
+match str =
     let
+        regex = Regex.regex "^(\\s*)(feature|test)\\s*:\\s*(\\w.*)"
+            |> Regex.caseInsensitive
+    in
+        Regex.find (Regex.All) regex str
+            |> List.map .submatches
+            |> List.head
+            |> Maybe.withDefault []
+
+
+lexIndent : List Int -> String -> (Int, Token)
+lexIndent indentStack str =
+    let
+        prevIndentCt = Maybe.withDefault 0 (List.head indentStack)
         indentCt = countSpaces str
         indentTk =
             if indentCt > prevIndentCt then Indent
