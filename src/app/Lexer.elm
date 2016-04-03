@@ -19,29 +19,29 @@ toTokens : String -> List Token
 toTokens input =
     let
         lines = String.lines input
-        (_, lexedLines) = lexLines [] lines
+        (_, linesTks) = tokenizeLines [] lines
     in
         Debug.log "tokenized"
-            (List.foldr (++) [] lexedLines)
+            (List.foldr (++) [] linesTks)
 
 
-lexLines : List Int -> List String -> (List Int, List (List Token))
-lexLines indentStack lines =
+tokenizeLines : List Int -> List String -> (List Int, List (List Token))
+tokenizeLines indentStack lines =
     case lines of
         [] -> (indentStack, [])
         hd :: tl ->
             let
-                (indentStack', lexedHead) = lexLine indentStack hd
-                (indentStack'', lexedTail) = lexLines indentStack' tl
+                (indentStack', headTks) = tokenizeLine indentStack hd
+                (indentStack'', tailTks) = tokenizeLines indentStack' tl
             in
-                (indentStack'', [ lexedHead ] ++ lexedTail)
+                (indentStack'', [ headTks ] ++ tailTks)
 
 
-lexLine : List Int -> String -> (List Int, List Token)
-lexLine indentStack str =
+tokenizeLine : List Int -> String -> (List Int, List Token)
+tokenizeLine indentStack str =
     let
         matchedStr = Debug.log "test regex" (match str)
-        (indentCt, indentTk) = lexIndent indentStack str
+        (indentCt, indentTk) = tokenizeIndent indentStack str
         indentStack' =
             case indentTk of
                 Indent -> indentCt :: indentStack
@@ -63,8 +63,8 @@ match str =
             |> Maybe.withDefault []
 
 
-lexIndent : List Int -> String -> (Int, Token)
-lexIndent indentStack str =
+tokenizeIndent : List Int -> String -> (Int, Token)
+tokenizeIndent indentStack str =
     let
         prevIndentCt = Maybe.withDefault 0 (List.head indentStack)
         indentCt = countSpaces str
@@ -74,9 +74,6 @@ lexIndent indentStack str =
             else Samedent
     in
         (indentCt, indentTk)
-
-
--- TODO: tokenizeStatement
 
 
 countSpaces : String -> Int
