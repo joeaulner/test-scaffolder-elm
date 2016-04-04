@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "dev": "webpack-dev-server --devtool eval --progress --colors --hot --content-base build"
+    "dev": "webpack-dev-server --devtool eval --progress --colors --hot --content-base --host=0.0.0.0 build"
   },
   "keywords": [],
   "author": "Joseph Aulner",
