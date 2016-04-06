@@ -2,6 +2,8 @@ var path = require('path'),
     HtmlWebpackPlugin = require('html-webpack-plugin'),
     CleanWebpackPlugin = require('clean-webpack-plugin');
 
+require('es6-promise').polyfill();
+
 module.exports = {
     entry: [
         'webpack/hot/dev-server',
