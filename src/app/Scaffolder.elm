@@ -6,7 +6,7 @@ import Html.Events exposing (on, targetValue)
 import Signal exposing (Signal, Mailbox, Address)
 import String
 
-import Lexer
+import Parser
 
 
 -- MODEL
@@ -49,7 +49,7 @@ update action model =
         NoOp -> model
         SetInput testCases' ->
             let
-                tokenized = Lexer.toTokens testCases'
+                _ = Parser.toParseTree testCases'
             in
                 { model | testCases = testCases', codeScaffold = testCases' }
 
