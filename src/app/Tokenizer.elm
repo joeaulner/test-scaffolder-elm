@@ -1,26 +1,19 @@
-module Lexer (Token, toTokens) where
+module Tokenizer (Token(..), toTokens) where
 
 import String
 import Maybe
 import Regex exposing (Regex)
-
--- REMOVE
-import Debug
--- REMOVE
 
 
 type Token
     = Indent
     | Dedent
     | Samedent
-    | Block BlockType
-    | Description String
-    
-
-type BlockType
-    = Feature
+    | Feature
+    | Scenario
     | Test
     | NoBlock
+    | Description String
 
 
 toTokens : String -> List Token
@@ -29,7 +22,7 @@ toTokens input =
         lines = String.lines input
         (_, linesTks) = tokenizeLines [] lines
     in
-        Debug.log "output" (List.foldr (++) [] linesTks)
+        List.foldr (++) [] linesTks
 
 
 tokenizeLines : List Int -> List String -> (List Int, List (List Token))
@@ -79,18 +72,14 @@ tokenizeIndent indentStack str =
 tokenizeType : String -> (Token, String)
 tokenizeType str =
     let
-        feature = Regex.regex "^feature:\\s*"
-        test = Regex.regex "^test:\\s*"
-        trim n s = String.dropLeft n s |> String.trimLeft
-        (blockType, str') =
-            if contains "^feature:\\s*" str then
-                (Feature, trim 8 str)
-            else if contains "^test:\\s*" str then
-                (Test, trim 5 str)
-            else
-                (NoBlock, str)
+        trim n s = String.dropLeft n s
+        (tk, str') =
+            if contains "^feature:\\s*" str then (Feature, trim 8 str)
+            else if contains "^scenario:\\s*" str then (Scenario, trim 9 str)
+            else if contains "^test:\\s*" str then (Test, trim 5 str)
+            else (NoBlock, str)
     in
-        (Block blockType, str')
+        (tk, str')
 
 
 tokenizeDesc : String -> Token
