@@ -43,8 +43,17 @@ tokenizeLine indentStack str =
         (indentStack', indentToken, str') = tokenizeIndent indentStack str
         (typeToken, str'') = tokenizeType str'
         descToken = tokenizeDesc str''
+        
+        lineTks = [indentToken, typeToken, descToken]
+        resultTks =
+            case typeToken of
+                NoBlock ->
+                    case descToken of
+                        Description "" -> []
+                        _ -> lineTks
+                _ -> lineTks
     in
-        (indentStack', [indentToken, typeToken, descToken])
+        (indentStack', resultTks)
 
 
 tokenizeIndent : List Int -> String -> (List Int, Token, String)

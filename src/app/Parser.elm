@@ -20,28 +20,42 @@ toParseTree input =
 parseFeature : List Token -> ParseTree
 parseFeature tokens =
     case tokens of
-        Samedent :: tks -> parseFeature tks
-        Feature :: (Description str) :: tks ->
+        Samedent :: ts -> parseFeature ts
+        Feature :: (Description str) :: ts ->
             let
                 d = LeafNode (Description str)
-                (tks', desc) = dropIndent tks |> descriptions
-                -- (scen, tks'') = scenarios tks'
+                (ts', desc) = dropIndent ts |> descriptions
+                (ts'', scen) = dropIndent ts' |> scenarios
             in
-                Node (Feature, d :: desc)
+                Node (Feature, List.concat [d :: desc, scen])
         _ -> Node (Samedent, [])
 
 
 descriptions : List Token -> (List Token, List ParseTree)
 descriptions tokens =
     case tokens of
-        Samedent :: tks -> descriptions tks
-        NoBlock :: tks -> descriptions tks
-        (Description str) :: tks ->
+        Samedent :: ts -> descriptions ts
+        NoBlock :: ts -> descriptions ts
+        (Description str) :: ts ->
             let
                 node = LeafNode (Description str)
-                (tks', pts) = descriptions tks
+                (ts', pts) = descriptions ts
             in
-                (tks', node :: pts)
+                (ts', node :: pts)
+        _ -> (tokens, [])
+
+
+scenarios : List Token -> (List Token, List ParseTree)
+scenarios tokens =
+    case tokens of
+        Samedent :: ts -> scenarios ts
+        Scenario :: (Description str) :: ts ->
+            let
+                d = LeafNode (Description str)
+                s = Node (Scenario, [d])
+                (ts', pts) = scenarios ts
+            in
+                (ts', s :: pts)
         _ -> (tokens, [])
 
 
