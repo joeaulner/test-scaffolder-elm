@@ -21,19 +21,21 @@ parseFeature : List Token -> ParseTree
 parseFeature tokens =
     case tokens of
         Samedent :: tks -> parseFeature tks
-        Feature :: tks ->
+        Feature :: (Description str) :: tks ->
             let
-                (tks', desc) = descriptions tks
+                d = LeafNode (Description str)
+                (tks', desc) = dropIndent tks |> descriptions
                 -- (scen, tks'') = scenarios tks'
             in
-                Node (Feature, desc)
+                Node (Feature, d :: desc)
         _ -> Node (Samedent, [])
 
 
 descriptions : List Token -> (List Token, List ParseTree)
 descriptions tokens =
     case tokens of
-        Samedent :: NoBlock :: tks -> descriptions tks
+        Samedent :: tks -> descriptions tks
+        NoBlock :: tks -> descriptions tks
         (Description str) :: tks ->
             let
                 node = LeafNode (Description str)
@@ -41,3 +43,10 @@ descriptions tokens =
             in
                 (tks', node :: pts)
         _ -> (tokens, [])
+
+
+dropIndent : List Token -> List Token
+dropIndent tokens =
+    case tokens of
+        Indent :: ts -> dropIndent ts
+        _ -> tokens
