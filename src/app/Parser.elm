@@ -11,7 +11,7 @@ type ParseTree
 toParseTree : String -> String
 toParseTree input =
     let
-        tokens = Debug.log "tokens" (Tokenizer.toTokens input)
+        tokens = Tokenizer.toTokens input
         parseTree = Debug.log "parse tree" (parseFeature tokens)
     in
         input
@@ -52,10 +52,25 @@ scenarios tokens =
         Scenario :: (Description str) :: ts ->
             let
                 d = LeafNode (Description str)
-                s = Node (Scenario, [d])
-                (ts', pts) = scenarios ts
+                (ts', t) = dropIndent ts |> tests
+                s = Node (Scenario, d :: t)
+                (ts'', pts) = scenarios ts
             in
-                (ts', s :: pts)
+                (ts'', s :: pts)
+        _ -> (tokens, [])
+
+
+tests : List Token -> (List Token, List ParseTree)
+tests tokens =
+    case tokens of
+        Samedent :: ts -> tests ts
+        Test :: (Description str) :: ts ->
+            let
+                d = LeafNode (Description str)
+                t = Node (Test, [d])
+                (ts', pts) = tests ts
+            in
+                (ts', t :: pts)
         _ -> (tokens, [])
 
 
