@@ -4,7 +4,7 @@ import Tokenizer exposing (Token(..), toTokens)
 
 
 type ParseTree
-    = Node (Token, List ParseTree)
+    = Node Token (List ParseTree)
     | LeafNode Token
 
 
@@ -27,8 +27,8 @@ parseFeature tokens =
                 (ts', desc) = dropIndent ts |> descriptions
                 (ts'', scen) = dropIndent ts' |> scenarios
             in
-                Node (Feature, List.concat [d :: desc, scen])
-        _ -> Node (Samedent, [])
+                Node Feature (List.concat [d :: desc, scen])
+        _ -> Node Samedent []
 
 
 descriptions : List Token -> (List Token, List ParseTree)
@@ -53,7 +53,7 @@ scenarios tokens =
             let
                 d = LeafNode (Description str)
                 (ts', t) = dropIndent ts |> tests
-                s = Node (Scenario, d :: t)
+                s = Node Scenario (d :: t)
                 (ts'', pts) = scenarios ts
             in
                 (ts'', s :: pts)
@@ -67,7 +67,7 @@ tests tokens =
         Test :: (Description str) :: ts ->
             let
                 d = LeafNode (Description str)
-                t = Node (Test, [d])
+                t = Node Test [d]
                 (ts', pts) = tests ts
             in
                 (ts', t :: pts)
