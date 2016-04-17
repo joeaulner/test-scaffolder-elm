@@ -57,6 +57,8 @@ scenarios tokens =
                 (ts'', pts) = scenarios ts
             in
                 (ts'', s :: pts)
+        Dedent :: ts ->
+            dropDedent ts |> scenarios
         _ -> (tokens, [])
 
 
@@ -71,6 +73,8 @@ tests tokens =
                 (ts', pts) = tests ts
             in
                 (ts', t :: pts)
+        Dedent :: ts ->
+            dropDedent ts |> scenarios
         _ -> (tokens, [])
 
 
@@ -78,4 +82,11 @@ dropIndent : List Token -> List Token
 dropIndent tokens =
     case tokens of
         Indent :: ts -> dropIndent ts
+        _ -> tokens
+
+
+dropDedent : List Token -> List Token
+dropDedent tokens =
+    case tokens of
+        Dedent :: ts -> dropIndent ts
         _ -> tokens
