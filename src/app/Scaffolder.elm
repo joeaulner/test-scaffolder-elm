@@ -6,7 +6,7 @@ import Html.Events exposing (on, targetValue)
 import Signal exposing (Signal, Mailbox, Address)
 import String
 
-import Parser
+import Formatter
 
 
 -- MODEL
@@ -49,9 +49,12 @@ update action model =
         NoOp -> model
         SetInput testCases' ->
             let
-                _ = Parser.toParseTree testCases'
+                codeScaffold' = Formatter.toJavaScript testCases'
             in
-                { model | testCases = testCases', codeScaffold = testCases' }
+                { model
+                | testCases = testCases'
+                , codeScaffold = codeScaffold'
+                }
 
 
 -- VIEW

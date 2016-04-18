@@ -1,4 +1,4 @@
-module Parser (toParseTree) where
+module Parser (ParseTree(..), toParseTree) where
 
 import Tokenizer exposing (Token(..), toTokens)
 
@@ -8,13 +8,12 @@ type ParseTree
     | LeafNode Token
 
 
-toParseTree : String -> String
+toParseTree : String -> ParseTree
 toParseTree input =
     let
         tokens = Tokenizer.toTokens input
-        parseTree = Debug.log "parse tree" (parseFeature tokens)
     in
-        input
+        parseFeature tokens
 
 
 parseFeature : List Token -> ParseTree
