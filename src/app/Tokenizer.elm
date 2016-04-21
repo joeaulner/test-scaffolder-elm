@@ -22,7 +22,18 @@ toTokens input =
         lines = String.lines input
         (_, linesTks) = tokenizeLines [] lines
     in
-        List.foldr (++) [] linesTks
+        clean <| List.foldr (++) [] linesTks
+
+
+clean : List Token -> List Token
+clean tokens =
+    let
+        predicate t =
+            case t of
+                Samedent -> False
+                _ -> True
+    in
+        List.filter predicate tokens
 
 
 tokenizeLines : List Int -> List String -> (List Int, List (List Token))

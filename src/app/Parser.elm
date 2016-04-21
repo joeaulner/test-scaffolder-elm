@@ -19,7 +19,6 @@ toParseTree input =
 parseFeature : List Token -> ParseTree
 parseFeature tokens =
     case tokens of
-        Samedent :: ts -> parseFeature ts
         Feature :: (Description str) :: ts ->
             let
                 d = LeafNode (Description str)
@@ -33,7 +32,6 @@ parseFeature tokens =
 descriptions : List Token -> (List Token, List ParseTree)
 descriptions tokens =
     case tokens of
-        Samedent :: ts -> descriptions ts
         NoBlock :: ts -> descriptions ts
         (Description str) :: ts ->
             let
@@ -47,7 +45,6 @@ descriptions tokens =
 scenarios : List Token -> (List Token, List ParseTree)
 scenarios tokens =
     case tokens of
-        Samedent :: ts -> scenarios ts
         Scenario :: (Description str) :: ts ->
             let
                 d = LeafNode (Description str)
@@ -64,7 +61,6 @@ scenarios tokens =
 tests : List Token -> (List Token, List ParseTree)
 tests tokens =
     case tokens of
-        Samedent :: ts -> tests ts
         Test :: (Description str) :: ts ->
             let
                 d = LeafNode (Description str)
