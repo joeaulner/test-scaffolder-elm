@@ -1,4 +1,4 @@
-module Tokenizer (Token(..), toTokens) where
+module Tokenizer (Token(..), toTokens, tokenToString) where
 
 import String
 import Maybe
@@ -14,6 +14,7 @@ type Token
     | Test
     | NoBlock
     | Description String
+    | Error String
 
 
 toTokens : String -> List Token
@@ -31,6 +32,7 @@ clean tokens =
         predicate t =
             case t of
                 Samedent -> False
+                NoBlock -> False
                 _ -> True
     in
         List.filter predicate tokens
@@ -62,7 +64,8 @@ tokenizeLine indentStack str =
                     case descToken of
                         Description "" -> []
                         _ -> lineTks
-                _ -> lineTks
+                _ ->
+                    lineTks
     in
         (indentStack', resultTks)
 
@@ -118,3 +121,17 @@ find regexStr str =
         |> List.map .match
         |> List.head
         |> Maybe.withDefault ""
+
+
+tokenToString : Token -> String
+tokenToString token =
+    case token of
+        Indent -> "indent"
+        Dedent -> "dedent"
+        Samedent -> "samedent"
+        Feature -> "feature"
+        Scenario -> "scenario"
+        Test -> "test"
+        NoBlock -> "noblock"
+        Description _ -> "description"
+        Error _ -> "error"

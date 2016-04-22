@@ -1,6 +1,6 @@
 module Parser (ParseTree(..), toParseTree) where
 
-import Tokenizer exposing (Token(..), toTokens)
+import Tokenizer exposing (Token(..))
 
 
 type ParseTree
@@ -22,41 +22,37 @@ parseFeature tokens =
         Feature :: Description str :: ts ->
             let
                 description = LeafNode (Description str)
-                (ts', scenarios) = dropIndent ts |> parseScenarios
+                (ts', contents) = dropIndent ts |> parseContents
             in
-                Node Feature (description :: scenarios)
-        _ -> Node Samedent []
+                Node Feature (description :: contents)
+        _ ->
+            parseError tokens
 
 
-parseScenarios : List Token -> (List Token, List ParseTree)
-parseScenarios tokens =
+parseContents : List Token -> (List Token, List ParseTree)
+parseContents tokens =
     case tokens of
         Scenario :: Description str :: ts ->
             let
-                d = LeafNode (Description str)
-                (ts', t) = dropIndent ts |> tests
-                s = Node Scenario (d :: t)
-                (ts'', pts) = parseScenarios ts
+                description = LeafNode (Description str)
+                (ts', contents) = dropIndent ts |> parseContents
+                scenario = Node Scenario (description :: contents)
+                (ts'', rest) = parseContents ts'
             in
-                (ts'', s :: pts)
-        Dedent :: ts ->
-            dropDedent ts |> parseScenarios
-        _ -> (tokens, [])
-
-
-tests : List Token -> (List Token, List ParseTree)
-tests tokens =
-    case tokens of
+                (ts'', scenario :: rest)
         Test :: Description str :: ts ->
             let
-                d = LeafNode (Description str)
-                t = Node Test [d]
-                (ts', pts) = tests ts
+                description = LeafNode (Description str)
+                test = Node Test [description]
+                (ts', rest) = parseContents ts
             in
-                (ts', t :: pts)
+                (ts', test :: rest)
         Dedent :: ts ->
-            dropDedent ts |> parseScenarios
-        _ -> (tokens, [])
+            (ts, [])
+        [] ->
+            (tokens, [])
+        _ ->
+            ([], [parseError tokens])
 
 
 dropIndent : List Token -> List Token
@@ -66,8 +62,11 @@ dropIndent tokens =
         _ -> tokens
 
 
-dropDedent : List Token -> List Token
-dropDedent tokens =
-    case tokens of
-        Dedent :: ts -> dropIndent ts
-        _ -> tokens
+parseError : List Token -> ParseTree
+parseError tokens =
+    LeafNode <| Error <|
+        case tokens of
+            t :: ts ->
+                "Unexpected token: " ++ (Tokenizer.tokenToString t)
+            [] ->
+                "Unexpected end of input"
