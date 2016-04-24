@@ -65,6 +65,13 @@ format parseTree state =
                 withContents = formatList children state' |> .output
             in
                 { state | output = withContents ++ close }
+        
+        Node Test (LeafNode (Description desc) :: []) ->
+            let
+                open = tabs state ++ "it('" ++ desc ++ "', function() {\n"
+                close = tabs state ++ "});\n"
+            in
+                { state | output = state.output ++ open ++ close }
                 
         _ -> state
 
