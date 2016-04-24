@@ -31,8 +31,7 @@ formatList : List ParseTree -> State -> State
 formatList parseTrees state =
     case parseTrees of
         pt :: pts ->
-            format pt state
-                |> formatList pts
+            format pt state |> formatList pts
         [] ->
             state
 
@@ -40,40 +39,36 @@ formatList parseTrees state =
 format : ParseTree -> State -> State
 format parseTree state =
     case parseTree of
-        Node Feature (LeafNode (Description desc) :: children) ->
-            let
-                open = tabs state ++ "describe('" ++ desc ++ "', function() {\n"
-                close = tabs state ++ "});\n"
-                state' =
-                    { state
-                    | indent = state.indent + 4
-                    , output = state.output ++ open
-                    }
-                withContents = formatList children state' |> .output
-            in
-                { state | output = withContents ++ close }
+        Node Feature (LeafNode (Description description) :: children) ->
+            appendDesribe description children state
 
-        Node Scenario (LeafNode (Description desc) :: children) ->
+        Node Scenario (LeafNode (Description description) :: children) ->
+            appendDesribe description children state
+
+        Node Test (LeafNode (Description description) :: []) ->
             let
-                open = tabs state ++ "describe('" ++ desc ++ "', function() {\n"
-                close = tabs state ++ "});\n"
-                state' =
-                    { state
-                    | indent = state.indent + 4
-                    , output = state.output ++ open
-                    }
-                withContents = formatList children state' |> .output
-            in
-                { state | output = withContents ++ close }
-        
-        Node Test (LeafNode (Description desc) :: []) ->
-            let
-                open = tabs state ++ "it('" ++ desc ++ "', function() {\n"
+                open = tabs state ++ "it('" ++ description ++ "', function() {\n"
                 close = tabs state ++ "});\n"
             in
                 { state | output = state.output ++ open ++ close }
-                
-        _ -> state
+
+        _ ->
+            state
+
+
+appendDesribe : String -> List ParseTree -> State -> State
+appendDesribe description children state =
+    let
+        open = tabs state ++ "describe('" ++ description ++ "', function() {\n"
+        close = tabs state ++ "});\n"
+        state' =
+            { state
+            | indent = state.indent + 4
+            , output = state.output ++ open
+            }
+        withContents = formatList children state' |> .output
+    in
+        { state | output = withContents ++ close }
 
 
 tabs : State -> String

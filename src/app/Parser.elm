@@ -61,6 +61,7 @@ parseContents tokens =
                 (ts'', rest) = parseContents ts'
             in
                 (ts'', scenario :: rest)
+
         Test :: Description str :: ts ->
             let
                 description = LeafNode (Description str)
@@ -68,10 +69,13 @@ parseContents tokens =
                 (ts', rest) = parseContents ts
             in
                 (ts', test :: rest)
+
         Dedent :: ts ->
             (ts, [])
+            
         [] ->
             (tokens, [])
+            
         _ ->
             ([], [parseError tokens])
 
@@ -91,9 +95,12 @@ validateParseTree parseTrees =
     case parseTrees of
         ParseError str :: rest ->
             Error str
+
         Node _ contents :: rest ->
             validateParseTree <| contents ++ rest
+
         node :: rest ->
             validateParseTree rest
+
         [] ->
             Valid []
