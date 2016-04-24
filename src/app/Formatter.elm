@@ -43,26 +43,29 @@ format parseTree state =
         Node Feature (LeafNode (Description desc) :: children) ->
             let
                 open = tabs state ++ "describe('" ++ desc ++ "', function() {\n"
-                close = "});\n"
-                contents =
-                    { state | indent = state.indent + 4 }
-                        |> formatList children
-                        |> .output
-                output' = state.output ++ open ++ contents ++ close
+                close = tabs state ++ "});\n"
+                state' =
+                    { state
+                    | indent = state.indent + 4
+                    , output = state.output ++ open
+                    }
+                withContents = formatList children state' |> .output
             in
-                { state | output = output' }
+                { state | output = withContents ++ close }
 
         Node Scenario (LeafNode (Description desc) :: children) ->
             let
                 open = tabs state ++ "describe('" ++ desc ++ "', function() {\n"
-                close = "});\n"
-                contents =
-                    { state | indent = state.indent + 4 }
-                        |> formatList children
-                        |> .output
-                output' = state.output ++ open ++ contents ++ close
+                close = tabs state ++ "});\n"
+                state' =
+                    { state
+                    | indent = state.indent + 4
+                    , output = state.output ++ open
+                    }
+                withContents = formatList children state' |> .output
             in
-                { state | output = output' }
+                { state | output = withContents ++ close }
+                
         _ -> state
 
 

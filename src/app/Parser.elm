@@ -33,7 +33,12 @@ parseFeature tokens =
         Feature :: Description str :: ts ->
             let
                 description = LeafNode (Description str)
-                (ts', contents) = dropIndent ts |> parseContents
+                (ts', contents) =
+                    case ts of
+                        Indent :: cs ->
+                            parseContents cs
+                        _ ->
+                            (ts, [])
             in
                 Node Feature (description :: contents)
         _ ->
@@ -46,7 +51,12 @@ parseContents tokens =
         Scenario :: Description str :: ts ->
             let
                 description = LeafNode (Description str)
-                (ts', contents) = dropIndent ts |> parseContents
+                (ts', contents) =
+                    case ts of
+                        Indent :: cs ->
+                            parseContents cs
+                        _ ->
+                            (ts, [])
                 scenario = Node Scenario (description :: contents)
                 (ts'', rest) = parseContents ts'
             in
@@ -64,13 +74,6 @@ parseContents tokens =
             (tokens, [])
         _ ->
             ([], [parseError tokens])
-
-
-dropIndent : List Token -> List Token
-dropIndent tokens =
-    case tokens of
-        Indent :: ts -> dropIndent ts
-        _ -> tokens
 
 
 parseError : List Token -> ParseTree
