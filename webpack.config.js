@@ -63,4 +63,11 @@ if (TARGET === 'dev' || !TARGET) {
     });
 } else if (TARGET === 'build') {
     module.exports = merge(common, {});
+} else if (TARGET === 'gh-pages') {
+    module.exports = merge(common, {
+        output: {
+            path: __dirname,
+            filename: 'bundle.js'
+        }
+    })
 }

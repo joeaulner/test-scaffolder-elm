@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
+    "gh-pages": "webpack",
     "dev": "webpack-dev-server"
   },
   "keywords": [],
