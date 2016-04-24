@@ -6,39 +6,66 @@ import Tokenizer exposing (Token(..))
 import Parser exposing (ParseTree(..), ParseResult(..))
 
 
+type alias State =
+    { indent: Int
+    , output: String
+    }
+
+
+initState =
+    { indent = 0
+    , output = ""
+    }
+
+
 toJavaScript : String -> String
 toJavaScript input =
-    let
-        (_, formatted) =
-            case Parser.toParseTree input of
-                Valid parsed ->
-                    format parsed 0 ""
-                Error error ->
-                    ([], error)
-    in
-        formatted
+    case Parser.toParseTree input of
+        Valid parsed ->
+            formatList parsed initState |> .output
+        Error error ->
+            error
 
 
-format : List ParseTree -> Int -> String -> (List ParseTree, String)
-format parseTrees indent output =
+formatList : List ParseTree -> State -> State
+formatList parseTrees state =
     case parseTrees of
-        p :: pts ->
-            case p of
-                Node Feature (LeafNode (Description str) :: children) ->
-                    let
-                        indent' = indent + 4
-                        open = "describe('" ++ str ++ "'), function() {\n"
-                        (_, contents) = format children indent' ""
-                        close = "});\n"
-                    in
-                        (pts, output ++ open ++ contents ++ close)
-                Node Scenario (LeafNode (Description str) :: children) ->
-                    let
-                        indent' = indent + 4
-                        open = "describe('" ++ str ++ "'), function() {\n"
-                        (_, contents) = format children indent' ""
-                        close = "});\n"
-                    in
-                        (pts, output ++ open ++ contents ++ close)
-                _ -> (parseTrees, "")
-        _ -> (parseTrees, "")
+        pt :: pts ->
+            format pt state
+                |> formatList pts
+        [] ->
+            state
+
+
+format : ParseTree -> State -> State
+format parseTree state =
+    case parseTree of
+        Node Feature (LeafNode (Description desc) :: children) ->
+            let
+                open = tabs state ++ "describe('" ++ desc ++ "', function() {\n"
+                close = "});\n"
+                contents =
+                    { state | indent = state.indent + 4 }
+                        |> formatList children
+                        |> .output
+                output' = state.output ++ open ++ contents ++ close
+            in
+                { state | output = output' }
+
+        Node Scenario (LeafNode (Description desc) :: children) ->
+            let
+                open = tabs state ++ "describe('" ++ desc ++ "', function() {\n"
+                close = "});\n"
+                contents =
+                    { state | indent = state.indent + 4 }
+                        |> formatList children
+                        |> .output
+                output' = state.output ++ open ++ contents ++ close
+            in
+                { state | output = output' }
+        _ -> state
+
+
+tabs : State -> String
+tabs state =
+    String.repeat state.indent " "
