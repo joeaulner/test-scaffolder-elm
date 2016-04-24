@@ -1,4 +1,4 @@
-module Parser (ParseTree(..), toParseTree) where
+module Parser (ParseTree(..), ParseResult(..), toParseTree) where
 
 import Tokenizer exposing (Token(..))
 
@@ -9,12 +9,22 @@ type ParseTree
     | ParseError String
 
 
-toParseTree : String -> ParseTree
+type ParseResult
+    = Valid (List ParseTree)
+    | Error String
+
+
+toParseTree : String -> ParseResult
 toParseTree input =
     let
         tokens = Tokenizer.toTokens input
+        parsed = parseFeature tokens
     in
-        parseFeature tokens
+        case validateParseTree [parsed] of
+            Valid _ ->
+                Valid [parsed]
+            Error error ->
+                Error error
 
 
 parseFeature : List Token -> ParseTree
@@ -71,3 +81,16 @@ parseError tokens =
                 "Unexpected token: " ++ (Tokenizer.tokenToString t)
             [] ->
                 "Unexpected end of input"
+
+
+validateParseTree : List ParseTree -> ParseResult
+validateParseTree parseTrees =
+    case parseTrees of
+        ParseError str :: rest ->
+            Error str
+        Node _ contents :: rest ->
+            validateParseTree <| contents ++ rest
+        node :: rest ->
+            validateParseTree rest
+        [] ->
+            Valid []
