@@ -6,6 +6,7 @@ import Tokenizer exposing (Token(..))
 type ParseTree
     = Node Token (List ParseTree)
     | LeafNode Token
+    | ParseError String
 
 
 toParseTree : String -> ParseTree
@@ -64,7 +65,7 @@ dropIndent tokens =
 
 parseError : List Token -> ParseTree
 parseError tokens =
-    LeafNode <| Error <|
+    ParseError <|
         case tokens of
             t :: ts ->
                 "Unexpected token: " ++ (Tokenizer.tokenToString t)

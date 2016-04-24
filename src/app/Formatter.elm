@@ -1,14 +1,26 @@
 module Formatter where
 
+import String
+
 import Tokenizer exposing (Token(..))
-import Parser exposing (ParseTree(..), toParseTree)
+import Parser exposing (ParseTree(..))
+
+
+type ParseStatus
+    = Valid
+    | Error String
 
 
 toJavaScript : String -> String
 toJavaScript input =
     let
-        parsed  = Debug.log "parsed" (Parser.toParseTree input)
-        (_, formatted) = format [parsed] 0 ""
+        parsed  = Parser.toParseTree input
+        (_, formatted) = 
+            case validateParseTree [parsed] of
+                Valid ->
+                    format [parsed] 0 ""
+                Error str ->
+                    ([], str)
     in
         formatted
 
@@ -36,3 +48,16 @@ format parseTrees indent output =
                         (pts, output ++ open ++ contents ++ close)
                 _ -> (parseTrees, "")
         _ -> (parseTrees, "")
+
+
+validateParseTree : List ParseTree -> ParseStatus
+validateParseTree parseTrees =
+    case parseTrees of
+        ParseError str :: rest ->
+            Error str
+        Node _ contents :: rest ->
+            validateParseTree <| contents ++ rest
+        node :: rest ->
+            validateParseTree rest
+        [] ->
+            Valid

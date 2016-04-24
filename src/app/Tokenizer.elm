@@ -14,7 +14,6 @@ type Token
     | Test
     | NoBlock
     | Description String
-    | Error String
 
 
 toTokens : String -> List Token
@@ -133,5 +132,4 @@ tokenToString token =
         Scenario -> "scenario"
         Test -> "test"
         NoBlock -> "noblock"
-        Description _ -> "description"
-        Error _ -> "error"
+        Description str -> "description (" ++ str ++ ")"
