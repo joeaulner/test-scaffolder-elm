@@ -9,7 +9,7 @@ module.exports = {
         path.resolve(__dirname, 'src/main.js')
     ],
     output: {
-        path: path.resolve(__dirname, 'build'),
+        path: __dirname,
         filename: 'bundle.js'
     },
     plugins: [
