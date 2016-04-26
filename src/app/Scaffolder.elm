@@ -1,7 +1,7 @@
 module Scaffolder (Model, model, view, actions) where
 
-import Html exposing (Html, div, nav, span, text, textarea, label, form)
-import Html.Attributes exposing (class, id, for, readonly)
+import Html exposing (Html, div, nav, span, text, textarea, label, form, a)
+import Html.Attributes exposing (class, id, for, readonly, href, target)
 import Html.Events exposing (on, targetValue)
 import Signal exposing (Signal, Mailbox, Address)
 import String
@@ -67,6 +67,11 @@ view address model =
             [ div [ class "nav-wrapper container" ]
                 [ span [ class "brand-logo" ]
                     [ text "Test Scaffolder" ]
+                , a [ class "right"
+                    , href "https://github.com/pancakeCaptain/test-scaffolder-elm"
+                    , target "_blank"
+                    ]
+                    [ text "View on Github" ]
                 ]
             ]
         , div [ class "container" ]
