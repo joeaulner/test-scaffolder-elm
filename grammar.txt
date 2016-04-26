@@ -1,8 +1,7 @@
-feature             ::= FEATURE DESCRIPTION INDENT description_list scenario_list
-                        | FEATURE desc_list
-description_list    ::= DESCRIPTION desc_list | (eps)
-scenario_list       ::= scenario scenario_list | scenario
-scenario            ::= SCENARIO DESCRIPTION INDENT test_list DEDENT
-                        | SCENARIO DESCRIPTION
-test_list           ::= test test_list | test
-test                ::= TEST DESCRIPTION
+feature     ::= FEATURE DESCRIPTION INDENT block_list | FEATURE DESCRIPTION
+
+block_list  ::= block block_list | block
+block       ::= scenario | test
+
+scenario    ::= SCENARIO DESCRIPTION INDENT block_list DEDENT | SCENARIO DESCRIPTION
+test        ::= TEST DESCRIPTION
