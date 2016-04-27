@@ -36,9 +36,18 @@ toTokens input =
 
 tokenize : String -> State -> State
 tokenize input state =
-    if contains "^\\s+" input then indent input state
-    else if contains "^feature *: *" input then feature input state
-    else if contains "^scenario *: *" input then scenario input state
+    if contains "^\\s+" input then
+        indent input state
+    
+    else if contains "^feature *: *" input then
+        block "^feature *: *" Feature input state
+    
+    else if contains "^scenario *: *" input then
+        block "^scenario *: *" Scenario input state
+        
+    else if contains "^test *: *" input then
+        block "^test *: *" Test input state
+        
     else state
 
 
@@ -59,22 +68,13 @@ indent input { indentStack, tokens } =
             }
 
 
-feature : String -> State -> State
-feature input state =
+block : String -> Token -> String -> State -> State
+block regexStr token input state =
     let
-        matchLength = String.length <| match "^feature *: *" input
+        matchLength = String.length <| match regexStr input
         input' = String.dropLeft matchLength input
     in
-        tokenize input' { state | tokens = Feature :: state.tokens }
-
-
-scenario : String -> State -> State
-scenario input state =
-    let
-        matchLength = String.length <| match "^scenario *: *" input
-        input' = String.dropLeft matchLength input
-    in
-        tokenize input' { state | tokens = Scenario :: state.tokens }
+        tokenize input' { state | tokens = token :: state.tokens }
 
 
 contains : String -> String -> Bool
