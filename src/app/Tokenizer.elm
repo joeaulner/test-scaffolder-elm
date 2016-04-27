@@ -16,97 +16,65 @@ type Token
     | Description String
 
 
+type alias State =
+    { indentStack: List Int
+    , tokens: List Token
+    }
+
+
+initState : State
+initState = State [] []
+
+
 toTokens : String -> List Token
 toTokens input =
+    tokenize input initState
+        |> .tokens
+        |> List.reverse
+        |> Debug.log "tokens"
+
+
+tokenize : String -> State -> State
+tokenize input state =
+    if contains "^\\s+" input then indent input state
+    else if contains "^feature *: *" input then feature input state
+    else if contains "^scenario *: *" input then scenario input state
+    else state
+
+
+indent : String -> State -> State
+indent input { indentStack, tokens } =
     let
-        lines = String.lines input
-        (_, linesTks) = tokenizeLines [] lines
+        matchLength = String.length <| match "^\\s+" input
+        input' = String.dropLeft matchLength input
+        previousIndent = Maybe.withDefault 0 <| List.head indentStack
+        tokens' =
+            if matchLength > previousIndent then Indent :: tokens
+            else if matchLength < previousIndent then Dedent :: tokens
+            else tokens
     in
-        clean <| List.foldr (++) [] linesTks
+        tokenize input'
+            { indentStack = matchLength :: indentStack
+            , tokens = tokens'
+            }
 
 
-clean : List Token -> List Token
-clean tokens =
+feature : String -> State -> State
+feature input state =
     let
-        predicate t =
-            case t of
-                Samedent -> False
-                NoBlock -> False
-                _ -> True
+        matchLength = String.length <| match "^feature *: *" input
+        input' = String.dropLeft matchLength input
     in
-        List.filter predicate tokens
+        tokenize input' { state | tokens = Feature :: state.tokens }
 
 
-tokenizeLines : List Int -> List String -> (List Int, List (List Token))
-tokenizeLines indentStack lines =
-    case lines of
-        [] -> (indentStack, [])
-        hd :: tl ->
-            let
-                (indentStack', headTks) = tokenizeLine indentStack hd
-                (indentStack'', tailTks) = tokenizeLines indentStack' tl
-            in
-                (indentStack'', headTks :: tailTks)
-
-
-tokenizeLine : List Int -> String -> (List Int, List Token)
-tokenizeLine indentStack str =
+scenario : String -> State -> State
+scenario input state =
     let
-        (indentStack', indentToken, str') = tokenizeIndent indentStack str
-        (typeToken, str'') = tokenizeType str'
-        descToken = tokenizeDesc str''
-        
-        lineTks = [indentToken, typeToken, descToken]
-        resultTks =
-            case typeToken of
-                NoBlock ->
-                    case descToken of
-                        Description "" -> []
-                        _ -> lineTks
-                _ ->
-                    lineTks
+        matchLength = String.length <| match "^scenario *: *" input
+        input' = String.dropLeft matchLength input
     in
-        (indentStack', resultTks)
-
-
-tokenizeIndent : List Int -> String -> (List Int, Token, String)
-tokenizeIndent indentStack str =
-    let
-        matched = find "^\\s*" str
-        indentCt = String.length matched
-        str' = String.dropLeft indentCt str
-        indentTk =
-            let
-                prevIndentCt = List.head indentStack |> Maybe.withDefault 0
-            in
-                if indentCt > prevIndentCt then Indent
-                else if indentCt < prevIndentCt then Dedent
-                else Samedent
-        indentStack' =
-            case indentTk of
-                Indent -> indentCt :: indentStack
-                Dedent -> Maybe.withDefault [] (List.tail indentStack)
-                _ -> indentStack
-    in
-        (indentStack', indentTk, str')
-
-
-tokenizeType : String -> (Token, String)
-tokenizeType str =
-    let
-        trim n s = String.dropLeft n s
-        (tk, str') =
-            if contains "^feature:\\s*" str then (Feature, trim 8 str)
-            else if contains "^scenario:\\s*" str then (Scenario, trim 9 str)
-            else if contains "^test:\\s*" str then (Test, trim 5 str)
-            else (NoBlock, str)
-    in
-        (tk, str')
-
-
-tokenizeDesc : String -> Token
-tokenizeDesc str =
-    Description <| String.trim str
+        tokenize input' { state | tokens = Scenario :: state.tokens }
 
 
 contains : String -> String -> Bool
@@ -114,8 +82,8 @@ contains regexStr str =
     Regex.contains (Regex.regex regexStr) str
 
 
-find : String -> String -> String
-find regexStr str =
+match : String -> String -> String
+match regexStr str =
     Regex.find (Regex.AtMost 1) (Regex.regex regexStr) str
         |> List.map .match
         |> List.head
