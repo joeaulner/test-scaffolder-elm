@@ -37,7 +37,27 @@ describe('Example feature', function() {
 });
 ```
 
+## Development
+
+Assuming you have `git` and `npm` installed:
+
+* Install Elm command line tools here: http://elm-lang.org/install
+* Clone the repository: `git clone https://github.com/pancakeCaptain/test-scaffolder-elm.git`
+* Enter project directory: `cd test-scaffolder-elm`
+* Install JS dependencies: `npm install`
+* Build project and launch webpack dev server: `npm run dev`
+* Produce production build artifacts: `npm run build`
+* Produce GitHub Pages build artifacts: `npm run gh-pages`
+
+Notes:
+* Webpack will install Elm dependencies listed in elm-package.json when
+any of the build tasks are executed.
+* Installing the Elm module evancz/virtual-dom occassionally fails due
+to a network handshake issue. Executing the install again should succeed.
+
 ## Backlog
+
+### Dev
 
 * Clean up formatting of JavaScript output
 * Allow abreviated and case-insensitive tags (eg. - "feature" could be "f" or "FEATURE")
@@ -47,3 +67,8 @@ describe('Example feature', function() {
     * insert spaces on tab
     * monospaced font
     * syntax highlighting
+
+### DevOps
+
+* Add minification to production build
+* Decide whether to host project somehwere other than GitHub Pages

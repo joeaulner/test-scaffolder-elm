@@ -8,105 +8,93 @@ import Regex exposing (Regex)
 type Token
     = Indent
     | Dedent
-    | Samedent
     | Feature
     | Scenario
     | Test
-    | NoBlock
     | Description String
+
+
+type alias State =
+    { indentStack: List Int
+    , tokens: List Token
+    }
+
+
+initState : State
+initState = State [] []
 
 
 toTokens : String -> List Token
 toTokens input =
-    let
-        lines = String.lines input
-        (_, linesTks) = tokenizeLines [] lines
-    in
-        clean <| List.foldr (++) [] linesTks
+    tokenize input initState
+        |> .tokens
+        |> List.reverse
+        |> Debug.log "tokens"
 
 
-clean : List Token -> List Token
-clean tokens =
-    let
-        predicate t =
-            case t of
-                Samedent -> False
-                NoBlock -> False
-                _ -> True
-    in
-        List.filter predicate tokens
+indentStr = "^\\s+"
+featureStr = "^feature *: *"
+scenarioStr = "^scenario *: *"
+testStr = "^test *: *"
+descriptionStr = "^.*?\\n"
 
 
-tokenizeLines : List Int -> List String -> (List Int, List (List Token))
-tokenizeLines indentStack lines =
-    case lines of
-        [] -> (indentStack, [])
-        hd :: tl ->
-            let
-                (indentStack', headTks) = tokenizeLine indentStack hd
-                (indentStack'', tailTks) = tokenizeLines indentStack' tl
-            in
-                (indentStack'', headTks :: tailTks)
-
-
-tokenizeLine : List Int -> String -> (List Int, List Token)
-tokenizeLine indentStack str =
-    let
-        (indentStack', indentToken, str') = tokenizeIndent indentStack str
-        (typeToken, str'') = tokenizeType str'
-        descToken = tokenizeDesc str''
+tokenize : String -> State -> State
+tokenize input state =
+    if contains indentStr input then
+        indent input state
+    
+    else if contains featureStr input then
+        block featureStr Feature input state
+    
+    else if contains scenarioStr input then
+        block scenarioStr Scenario input state
         
-        lineTks = [indentToken, typeToken, descToken]
-        resultTks =
-            case typeToken of
-                NoBlock ->
-                    case descToken of
-                        Description "" -> []
-                        _ -> lineTks
-                _ ->
-                    lineTks
-    in
-        (indentStack', resultTks)
+    else if contains testStr input then
+        block testStr Test input state
+    
+    else if contains descriptionStr input then
+        description input state
+        
+    else
+        { state | tokens = Description input :: state.tokens }
 
 
-tokenizeIndent : List Int -> String -> (List Int, Token, String)
-tokenizeIndent indentStack str =
+indent : String -> State -> State
+indent input { indentStack, tokens } =
     let
-        matched = find "^\\s*" str
-        indentCt = String.length matched
-        str' = String.dropLeft indentCt str
-        indentTk =
-            let
-                prevIndentCt = List.head indentStack |> Maybe.withDefault 0
-            in
-                if indentCt > prevIndentCt then Indent
-                else if indentCt < prevIndentCt then Dedent
-                else Samedent
-        indentStack' =
-            case indentTk of
-                Indent -> indentCt :: indentStack
-                Dedent -> Maybe.withDefault [] (List.tail indentStack)
-                _ -> indentStack
+        matchLength = String.length <| match indentStr input
+        input' = String.dropLeft matchLength input
+        previousIndent = Maybe.withDefault 0 <| List.head indentStack
+        tokens' =
+            if matchLength > previousIndent then Indent :: tokens
+            else if matchLength < previousIndent then Dedent :: tokens
+            else tokens
     in
-        (indentStack', indentTk, str')
+        tokenize input'
+            { indentStack = matchLength :: indentStack
+            , tokens = tokens'
+            }
 
 
-tokenizeType : String -> (Token, String)
-tokenizeType str =
+block : String -> Token -> String -> State -> State
+block regexStr token input state =
     let
-        trim n s = String.dropLeft n s
-        (tk, str') =
-            if contains "^feature:\\s*" str then (Feature, trim 8 str)
-            else if contains "^scenario:\\s*" str then (Scenario, trim 9 str)
-            else if contains "^test:\\s*" str then (Test, trim 5 str)
-            else (NoBlock, str)
+        matchLength = String.length <| match regexStr input
+        input' = String.dropLeft matchLength input
     in
-        (tk, str')
+        tokenize input' { state | tokens = token :: state.tokens }
 
 
-tokenizeDesc : String -> Token
-tokenizeDesc str =
-    Description <| String.trim str
+description : String -> State -> State
+description input state =
+    let
+        matched = match descriptionStr input
+        matchLength = String.length matched
+        input' = String.dropLeft matchLength input
+        token = Description <| String.dropRight 1 matched
+    in
+        tokenize input' { state | tokens = token :: state.tokens }
 
 
 contains : String -> String -> Bool
@@ -114,8 +102,8 @@ contains regexStr str =
     Regex.contains (Regex.regex regexStr) str
 
 
-find : String -> String -> String
-find regexStr str =
+match : String -> String -> String
+match regexStr str =
     Regex.find (Regex.AtMost 1) (Regex.regex regexStr) str
         |> List.map .match
         |> List.head
@@ -127,9 +115,7 @@ tokenToString token =
     case token of
         Indent -> "indent"
         Dedent -> "dedent"
-        Samedent -> "samedent"
         Feature -> "feature"
         Scenario -> "scenario"
         Test -> "test"
-        NoBlock -> "noblock"
         Description str -> "description (" ++ str ++ ")"

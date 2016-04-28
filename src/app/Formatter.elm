@@ -12,10 +12,8 @@ type alias State =
     }
 
 
-initState =
-    { indent = 0
-    , output = ""
-    }
+initState : State
+initState = State 0 ""
 
 
 toJavaScript : String -> String
