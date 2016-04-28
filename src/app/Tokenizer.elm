@@ -33,9 +33,9 @@ toTokens input =
 
 
 indentStr = "^\\s+"
-featureStr = "^feature *: *"
-scenarioStr = "^scenario *: *"
-testStr = "^test *: *"
+featureStr = "^(feature|feat|f) *: *"
+scenarioStr = "^(scenario|scen|s) *: *"
+testStr = "^(test|t) *: *"
 descriptionStr = "^.*?\\n"
 
 
@@ -99,15 +99,22 @@ description input state =
 
 contains : String -> String -> Bool
 contains regexStr str =
-    Regex.contains (Regex.regex regexStr) str
+    let
+        regex = Regex.caseInsensitive <| Regex.regex regexStr
+    in
+        Regex.contains regex str
 
 
 match : String -> String -> String
 match regexStr str =
-    Regex.find (Regex.AtMost 1) (Regex.regex regexStr) str
-        |> List.map .match
-        |> List.head
-        |> Maybe.withDefault ""
+    let
+        one = Regex.AtMost 1
+        regex = Regex.caseInsensitive <| Regex.regex regexStr
+    in
+        Regex.find one regex str
+            |> List.map .match
+            |> List.head
+            |> Maybe.withDefault ""
 
 
 tokenToString : Token -> String
