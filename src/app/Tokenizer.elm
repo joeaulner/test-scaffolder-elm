@@ -8,11 +8,9 @@ import Regex exposing (Regex)
 type Token
     = Indent
     | Dedent
-    | Samedent
     | Feature
     | Scenario
     | Test
-    | NoBlock
     | Description String
 
 
@@ -34,27 +32,38 @@ toTokens input =
         |> Debug.log "tokens"
 
 
+indentStr = "^\\s+"
+featureStr = "^feature *: *"
+scenarioStr = "^scenario *: *"
+testStr = "^test *: *"
+descriptionStr = "^.*?\\n"
+
+
 tokenize : String -> State -> State
 tokenize input state =
-    if contains "^\\s+" input then
+    if contains indentStr input then
         indent input state
     
-    else if contains "^feature *: *" input then
-        block "^feature *: *" Feature input state
+    else if contains featureStr input then
+        block featureStr Feature input state
     
-    else if contains "^scenario *: *" input then
-        block "^scenario *: *" Scenario input state
+    else if contains scenarioStr input then
+        block scenarioStr Scenario input state
         
-    else if contains "^test *: *" input then
-        block "^test *: *" Test input state
+    else if contains testStr input then
+        block testStr Test input state
+    
+    else if contains descriptionStr input then
+        description input state
         
-    else state
+    else
+        { state | tokens = Description input :: state.tokens }
 
 
 indent : String -> State -> State
 indent input { indentStack, tokens } =
     let
-        matchLength = String.length <| match "^\\s+" input
+        matchLength = String.length <| match indentStr input
         input' = String.dropLeft matchLength input
         previousIndent = Maybe.withDefault 0 <| List.head indentStack
         tokens' =
@@ -77,6 +86,17 @@ block regexStr token input state =
         tokenize input' { state | tokens = token :: state.tokens }
 
 
+description : String -> State -> State
+description input state =
+    let
+        matched = match descriptionStr input
+        matchLength = String.length matched
+        input' = String.dropLeft matchLength input
+        token = Description <| String.dropRight 1 matched
+    in
+        tokenize input' { state | tokens = token :: state.tokens }
+
+
 contains : String -> String -> Bool
 contains regexStr str =
     Regex.contains (Regex.regex regexStr) str
@@ -95,9 +115,7 @@ tokenToString token =
     case token of
         Indent -> "indent"
         Dedent -> "dedent"
-        Samedent -> "samedent"
         Feature -> "feature"
         Scenario -> "scenario"
         Test -> "test"
-        NoBlock -> "noblock"
         Description str -> "description (" ++ str ++ ")"
