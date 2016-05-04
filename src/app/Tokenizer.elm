@@ -41,23 +41,33 @@ descriptionStr = "^.*?\\n"
 
 tokenize : String -> State -> State
 tokenize input state =
-    if contains indentStr input then
-        indent input state
-    
-    else if contains featureStr input then
-        block featureStr Feature input state
-    
-    else if contains scenarioStr input then
-        block scenarioStr Scenario input state
-        
-    else if contains testStr input then
-        block testStr Test input state
-    
-    else if contains descriptionStr input then
-        description input state
-        
-    else
-        { state | tokens = Description input :: state.tokens }
+    if contains indentStr input then indent input state
+    else if contains featureStr input then feature input state
+    else if contains scenarioStr input then scenario input state
+    else if contains testStr input then test input state
+    else if contains descriptionStr input then description input state
+    else { state | tokens = Description input :: state.tokens }
+
+
+block : String -> Token -> String -> State -> State
+block regexStr token input state =
+    let
+        matchLength = String.length <| match regexStr input
+        input' = String.dropLeft matchLength input
+    in
+        tokenize input' { state | tokens = token :: state.tokens }
+
+
+feature : (String -> State -> State)
+feature = block featureStr Feature
+
+
+scenario : (String -> State -> State)
+scenario = block scenarioStr Scenario
+
+
+test : (String -> State -> State)
+test = block testStr Test
 
 
 indent : String -> State -> State
@@ -75,15 +85,6 @@ indent input { indentStack, tokens } =
             { indentStack = matchLength :: indentStack
             , tokens = tokens'
             }
-
-
-block : String -> Token -> String -> State -> State
-block regexStr token input state =
-    let
-        matchLength = String.length <| match regexStr input
-        input' = String.dropLeft matchLength input
-    in
-        tokenize input' { state | tokens = token :: state.tokens }
 
 
 description : String -> State -> State
