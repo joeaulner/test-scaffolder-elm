@@ -20,6 +20,10 @@ const common = {
         path: PATHS.build,
         filename: 'bundle.js'
     },
+    watchOptions: {
+        poll: 1000,
+        aggregateTimeout: 1000
+    },
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Test Scaffolder',
