@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "dev": "webpack-dev-server --devtool eval --progress --colors --hot --content-base --host=0.0.0.0 build"
+    "gh-pages": "webpack",
+    "dev": "webpack-dev-server --host=0.0.0.0"
   },
   "keywords": [],
   "author": "Joseph Aulner",
@@ -19,7 +20,8 @@
     "style-loader": "^0.13.0",
     "url-loader": "^0.5.7",
     "webpack": "^1.12.14",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "webpack-merge": "^0.12.0"
   },
   "dependencies": {
     "es6-promise": "^3.1.2",

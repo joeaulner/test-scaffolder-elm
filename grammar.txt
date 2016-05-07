@@ -1,0 +1,7 @@
+feature     ::= FEATURE DESCRIPTION INDENT block_list | FEATURE DESCRIPTION
+
+block_list  ::= block block_list | block
+block       ::= scenario | test
+
+scenario    ::= SCENARIO DESCRIPTION INDENT block_list DEDENT | SCENARIO DESCRIPTION
+test        ::= TEST DESCRIPTION

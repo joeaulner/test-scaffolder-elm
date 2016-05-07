@@ -1,17 +1,23 @@
 var path = require('path'),
+    webpack = require('webpack'),
+    merge = require('webpack-merge'),
     HtmlWebpackPlugin = require('html-webpack-plugin'),
     CleanWebpackPlugin = require('clean-webpack-plugin');
 
 require('es6-promise');
 
-module.exports = {
-    entry: [
-        'webpack/hot/dev-server',
-        'webpack-dev-server/client?http://localhost:8080',
-        path.resolve(__dirname, 'src/main.js')
-    ],
+const TARGET = process.env.npm_lifecycle_event;
+const PATHS = {
+    app: path.join(__dirname, 'src/main.js'),
+    build: path.join(__dirname, 'build')
+};
+
+const common = {
+    entry: {
+        app: PATHS.app
+    },
     output: {
-        path: path.resolve(__dirname, 'build'),
+        path: PATHS.build,
         filename: 'bundle.js'
     },
     plugins: [
@@ -26,7 +32,6 @@ module.exports = {
         })
     ],
     module: {
-        noParse: [/\.elm$/],
         loaders: [
             {
                 test: /\.elm$/,
@@ -46,3 +51,25 @@ module.exports = {
         ]
     }
 };
+
+if (TARGET === 'dev' || !TARGET) {
+    module.exports = merge(common, {
+        devServer: {
+            contentBase: PATHS.build,
+            historyApiFallback: true,
+            inline: true,
+            progress: true,
+            host: process.env.HOST,
+            port: process.env.PORT
+        }
+    });
+} else if (TARGET === 'build') {
+    module.exports = merge(common, {});
+} else if (TARGET === 'gh-pages') {
+    module.exports = merge(common, {
+        output: {
+            path: __dirname,
+            filename: 'bundle.js'
+        }
+    })
+}
