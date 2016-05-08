@@ -1,0 +1,7 @@
+web:
+  build: .
+  command: "npm run-script dev"
+  ports:
+    - "8080:8080"
+  volumes:
+    - .:/usr/src/app
