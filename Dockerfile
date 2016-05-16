@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 RUN     apt-get update
 RUN     apt-get install -y nodejs npm nodejs-legacy git
@@ -11,7 +11,7 @@ WORKDIR /usr/src/app
 
 COPY    package.json /usr/src/app
 RUN     npm install
-RUN     npm install elm -g
+RUN     npm install elm@0.16 -g
 
 COPY . /usr/src/app
 

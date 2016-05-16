@@ -4,8 +4,6 @@ var path = require('path'),
     HtmlWebpackPlugin = require('html-webpack-plugin'),
     CleanWebpackPlugin = require('clean-webpack-plugin');
 
-require('es6-promise');
-
 const TARGET = process.env.npm_lifecycle_event;
 const PATHS = {
     app: path.join(__dirname, 'src/main.js'),
