@@ -58,16 +58,16 @@ block regexStr token input state =
         tokenize input' { state | tokens = token :: state.tokens }
 
 
-feature : (String -> State -> State)
-feature = block featureStr Feature
+feature : String -> State -> State
+feature input = block featureStr Feature input
 
 
-scenario : (String -> State -> State)
-scenario = block scenarioStr Scenario
+scenario : String -> State -> State
+scenario input = block scenarioStr Scenario input
 
 
-test : (String -> State -> State)
-test = block testStr Test
+test : String -> State -> State
+test input = block testStr Test input
 
 
 indent : String -> State -> State
