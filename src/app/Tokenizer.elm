@@ -41,24 +41,33 @@ descriptionStr = "^.*?\\n"
 
 tokenize : String -> State -> State
 tokenize input state =
-    let
-        block regexStr token input state =
-            let
-                matchLength = String.length <| match regexStr input
-                input' = String.dropLeft matchLength input
-            in
-                tokenize input' { state | tokens = token :: state.tokens }
+    if contains indentStr input then indent input state
+    else if contains featureStr input then feature input state
+    else if contains scenarioStr input then scenario input state
+    else if contains testStr input then test input state
+    else if contains descriptionStr input then description input state
+    else { state | tokens = Description input :: state.tokens }
 
-        feature = block featureStr Feature
-        scenario = block scenarioStr Scenario
-        test = block testStr Test
+
+block : String -> Token -> String -> State -> State
+block regexStr token input state =
+    let
+        matchLength = String.length <| match regexStr input
+        input' = String.dropLeft matchLength input
     in
-        if contains indentStr input then indent input state
-        else if contains featureStr input then feature input state
-        else if contains scenarioStr input then scenario input state
-        else if contains testStr input then test input state
-        else if contains descriptionStr input then description input state
-        else { state | tokens = Description input :: state.tokens }
+        tokenize input' { state | tokens = token :: state.tokens }
+
+
+feature : String -> State -> State
+feature input = block featureStr Feature input
+
+
+scenario : String -> State -> State
+scenario input = block scenarioStr Scenario input
+
+
+test : String -> State -> State
+test input = block testStr Test input
 
 
 indent : String -> State -> State
