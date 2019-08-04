@@ -60,7 +60,7 @@ to a network handshake issue. Executing the install again should succeed.
 ### Dev
 
 * Clean up formatting of JavaScript output
-* Allow abreviated and case-insensitive tags (eg. - "feature" could be "f" or "FEATURE")
+* Allow abbreviated and case-insensitive tags (eg. - "feature" could be "f" or "FEATURE")
     * Maybe even infer block types from prescence or abscence of children
 * Add menu options to UI for selecting different frameworks to generate code for
 * Possible partner project to experiment with simple code editor written in Elm
